@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProImage - 专业图床系统</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- 头部导航 -->
+        <header class="app-header">
+            <div class="logo">ProImage</div>
+            <div class="user-actions">
+                <button class="btn btn-primary">升级套餐</button>
+                <div class="user-avatar"></div>
+            </div>
+        </header>
+        
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <!-- 上传区域 -->
+            <section class="upload-section">
+                <div class="upload-card" id="dropZone">
+                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                    <h3>拖放文件到此处或点击上传</h3>
+                    <input type="file" id="fileInput" multiple accept="image/*">
+                    <div class="upload-progress" id="uploadProgress">
+                        <div class="progress-bar"></div>
+                        <span class="progress-text">0%</span>
+                    </div>
+                </div>
+                <div class="upload-meta">
+                    <span><i class="fas fa-check-circle"></i> 支持 JPG/PNG/GIF/WEBP</span>
+                    <span><i class="fas fa-info-circle"></i> 单文件最大 20MB</span>
+                </div>
+            </section>
+            
+            <!-- 文件列表区 -->
+            <section class="file-list-section">
+                <div class="toolbar">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="搜索图片..." id="searchInput">
+                    </div>
+                    <div class="view-controls">
+                        <button class="view-btn active" data-view="grid" title="网格视图"><i class="fas fa-th-large"></i></button>
+                        <button class="view-btn" data-view="list" title="列表视图"><i class="fas fa-list"></i></button>
+                    </div>
+                </div>
+                
+                <div class="file-list" id="fileList">
+                    <!-- 动态加载文件列表 -->
+                </div>
+                
+                <div class="pagination">
+                    <button class="page-btn" id="prevPage" disabled><i class="fas fa-chevron-left"></i></button>
+                    <span class="page-info" id="pageInfo">1/5</span>
+                    <button class="page-btn" id="nextPage"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </section>
+        </main>
+        
+        <!-- 预览模态框 -->
+        <div class="preview-modal" id="previewModal">
+            <div class="modal-content">
+                <button class="close-btn"><i class="fas fa-times"></i></button>
+                <div class="image-container">
+                    <img class="preview-image" src="" alt="">
+                </div>
+                <div class="image-info">
+                    <div class="info-row">
+                        <span>文件名:</span>
+                        <span class="file-name">example.jpg</span>
+                    </div>
+                    <div class="info-row">
+                        <span>尺寸:</span>
+                        <span class="file-dimension">1920x1080</span>
+                    </div>
+                    <div class="info-row">
+                        <span>大小:</span>
+                        <span class="file-size">1.2MB</span>
+                    </div>
+                    <div class="info-row">
+                        <span>上传时间:</span>
+                        <span class="file-date">2023-05-15</span>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-copy"><i class="fas fa-link"></i> 复制链接</button>
+                        <button class="btn btn-download"><i class="fas fa-download"></i> 下载</button>
+                        <button class="btn btn-delete"><i class="fas fa-trash"></i> 删除</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Toast通知 -->
+        <div class="toast-container" id="toastContainer"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
