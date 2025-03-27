@@ -6,7 +6,7 @@ class ImageUploader {
         this.fileList = document.getElementById('fileList');
         this.uploadProgress = document.getElementById('uploadProgress');
         this.progressBar = this.uploadProgress.querySelector('.progress-bar');
-        this.progressText = this.uploadProgress.querySelector('.progress-text');
+        this.progressText = document.getElementById('progressText');
         this.previewModal = document.getElementById('previewModal');
         this.searchInput = document.getElementById('searchInput');
         this.prevPageBtn = document.getElementById('prevPage');
@@ -14,16 +14,18 @@ class ImageUploader {
         this.pageInfo = document.getElementById('pageInfo');
         this.toastContainer = document.getElementById('toastContainer');
         this.viewButtons = document.querySelectorAll('.view-btn');
+        this.itemsPerPageSelect = document.getElementById('itemsPerPage');
 
         // 初始化状态变量
         this.currentPage = 1;
+        this.itemsPerPage = 5; // 默认每页5个项目
         this.totalPages = 1;
         this.currentView = 'grid';
         this.files = [];
         this.filteredFiles = [];
         this.uploadQueue = [];
         this.isUploading = false;
-        this.itemsPerPage = 5; // 每页数量
+        this.lastToastTime = 0; // 用于防止重复toast
 
         // 初始化方法
         this.initEventListeners();
@@ -93,7 +95,18 @@ class ImageUploader {
             }
         });
 
-        // 恢复用户偏好的视图模式
+        // 每页显示数量选择
+        if (this.itemsPerPageSelect) {
+            this.itemsPerPageSelect.addEventListener('change', (e) => {
+                this.itemsPerPage = parseInt(e.target.value);
+                localStorage.setItem('itemsPerPage', this.itemsPerPage);
+                this.currentPage = 1; // 重置到第一页
+                this.updatePagination();
+                this.renderFileList();
+            });
+        }
+
+        // 恢复用户偏好设置
         const preferredView = localStorage.getItem('preferredView');
         if (preferredView) {
             this.currentView = preferredView;
@@ -103,6 +116,13 @@ class ImageUploader {
                 activeBtn.classList.add('active');
                 this.fileList.classList.toggle('list-view', preferredView === 'list');
             }
+        }
+
+        // 恢复每页显示数量设置
+        const savedItemsPerPage = localStorage.getItem('itemsPerPage');
+        if (savedItemsPerPage && this.itemsPerPageSelect) {
+            this.itemsPerPage = parseInt(savedItemsPerPage);
+            this.itemsPerPageSelect.value = this.itemsPerPage;
         }
     }
 
@@ -141,20 +161,20 @@ class ImageUploader {
 
         this.isUploading = true;
         const file = this.uploadQueue.shift();
-        
+
         try {
             this.showUploadProgress(true);
             const uploadedFile = await this.uploadFile(file);
-            
+
             // 添加到文件列表
             this.files.unshift(uploadedFile);
             this.filteredFiles.unshift(uploadedFile);
-            
+
             // 更新分页和渲染
             this.totalPages = Math.ceil(this.filteredFiles.length / this.itemsPerPage);
             this.updatePagination();
             this.renderFileList();
-            
+
             this.showToast(`${file.name} 上传成功`, 'success');
         } catch (error) {
             console.error('上传失败:', error);
@@ -174,7 +194,7 @@ class ImageUploader {
                 if (progress >= 100) {
                     progress = 100;
                     clearInterval(interval);
-                    
+
                     // 模拟上传成功后的响应
                     setTimeout(() => {
                         const uploadedFile = {
@@ -189,9 +209,11 @@ class ImageUploader {
                         resolve(uploadedFile);
                     }, 300);
                 }
-                this.updateProgress(progress);
+                // 更新进度，保留两位小数
+                this.updateProgress(Math.min(progress, 100));
             }, 200);
-            
+
+
             // 实际项目中应该使用fetch或axios
             /*
             const formData = new FormData();
@@ -221,12 +243,15 @@ class ImageUploader {
     }
 
     updateProgress(percent) {
-        this.progressBar.style.width = `${percent}%`;
-        this.progressText.textContent = `${percent}%`;
+        // 保留两位小数
+        const roundedPercent = Math.round(percent * 100) / 100;
+        this.progressBar.style.width = `${roundedPercent}%`;
+        this.progressText.textContent = `${roundedPercent.toFixed(2)}%`;
     }
 
     showUploadProgress(show) {
         this.uploadProgress.style.display = show ? 'block' : 'none';
+        this.progressText.style.display = show ? 'block' : 'none';
         if (!show) {
             this.updateProgress(0);
         }
@@ -239,7 +264,7 @@ class ImageUploader {
             // const data = await response.json();
             // this.files = data.files;
             // this.totalPages = data.totalPages;
-            
+
             // 模拟数据
             this.files = [
                 this.createMockFile(1, '风景照片.jpg', 'https://picsum.photos/id/10/800/600', '1.2MB', '1920x1080'),
@@ -251,7 +276,7 @@ class ImageUploader {
                 this.createMockFile(7, '城市景观.jpg', 'https://picsum.photos/id/16/800/600', '2.7MB', '1920x1080'),
                 this.createMockFile(8, '抽象艺术.png', 'https://picsum.photos/id/17/800/600', '1.5MB', '1200x800'),
             ];
-            
+
             this.filteredFiles = [...this.files];
             this.totalPages = Math.ceil(this.filteredFiles.length / this.itemsPerPage);
             this.updatePagination();
@@ -278,7 +303,7 @@ class ImageUploader {
         if (!searchTerm) {
             this.filteredFiles = [...this.files];
         } else {
-            this.filteredFiles = this.files.filter(file => 
+            this.filteredFiles = this.files.filter(file =>
                 file.name.toLowerCase().includes(searchTerm) ||
                 file.uploadedAt.toLowerCase().includes(searchTerm)
             );
@@ -290,19 +315,25 @@ class ImageUploader {
     }
 
     updatePagination() {
+        this.totalPages = Math.ceil(this.filteredFiles.length / this.itemsPerPage);
         this.prevPageBtn.disabled = this.currentPage <= 1;
         this.nextPageBtn.disabled = this.currentPage >= this.totalPages;
         this.pageInfo.textContent = `${this.currentPage}/${this.totalPages}`;
+
+        // 如果没有文件，显示总数为0
+        if (this.filteredFiles.length === 0) {
+            this.pageInfo.textContent = `0/0`;
+        }
     }
 
     renderFileList() {
         this.fileList.innerHTML = '';
-        
+
         // 分页逻辑
         const startIndex = (this.currentPage - 1) * this.itemsPerPage;
         const endIndex = Math.min(startIndex + this.itemsPerPage, this.filteredFiles.length);
         const filesToShow = this.filteredFiles.slice(startIndex, endIndex);
-        
+
         if (filesToShow.length === 0) {
             this.fileList.innerHTML = `
                 <div class="empty-state">
@@ -312,7 +343,7 @@ class ImageUploader {
             `;
             return;
         }
-        
+
         filesToShow.forEach(file => {
             const fileItem = document.createElement('div');
             fileItem.className = `file-item ${this.currentView === 'list' ? 'list-view' : ''}`;
@@ -329,10 +360,10 @@ class ImageUploader {
                     <div class="file-size">${file.size}</div>
                 </div>
             `;
-            
+
             this.fileList.appendChild(fileItem);
         });
-        
+
         // 添加预览事件
         document.querySelectorAll('.btn-preview').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -340,7 +371,7 @@ class ImageUploader {
                 this.showPreviewModal(fileId);
             });
         });
-        
+
         // 添加复制链接事件
         document.querySelectorAll('.btn-copy').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -363,12 +394,12 @@ class ImageUploader {
 
         const modal = this.previewModal;
         const previewImg = modal.querySelector('.preview-image');
-        
+
         // 显示加载状态
         previewImg.src = '';
         previewImg.style.display = 'none';
         modal.querySelector('.image-container').classList.add('loading');
-        
+
         // 预加载图片
         const img = new Image();
         img.src = file.url;
@@ -392,36 +423,44 @@ class ImageUploader {
         modal.querySelector('.file-dimension').textContent = file.dimensions;
         modal.querySelector('.file-size').textContent = file.size;
         modal.querySelector('.file-date').textContent = file.uploadedAt;
-        
-        // 设置操作按钮事件
+
+        // 移除旧的点击事件，防止重复绑定
         const copyBtn = modal.querySelector('.btn-copy');
         const downloadBtn = modal.querySelector('.btn-download');
         const deleteBtn = modal.querySelector('.btn-delete');
-        
-        copyBtn.onclick = () => {
-            this.copyToClipboard(file.url);
-            this.showToast('链接已复制到剪贴板', 'success');
+
+        // 克隆按钮并替换，确保事件只绑定一次
+        const newCopyBtn = copyBtn.cloneNode(true);
+        copyBtn.parentNode.replaceChild(newCopyBtn, copyBtn);
+
+        newCopyBtn.onclick = () => {
+            const now = Date.now();
+            if (now - this.lastToastTime > 1000) { // 1秒内只显示一次toast
+                this.copyToClipboard(file.url);
+                this.showToast('链接已复制到剪贴板', 'success');
+                this.lastToastTime = now;
+            }
         };
-        
+
         downloadBtn.onclick = () => {
             this.downloadFile(file.url, file.name);
         };
-        
+
         deleteBtn.onclick = () => {
             if (confirm(`确定要删除 "${file.name}" 吗？此操作不可撤销。`)) {
                 this.deleteFile(fileId);
             }
         };
-        
+
         // 关闭按钮事件
         const closeModal = () => {
             modal.style.display = 'none';
             document.body.style.overflow = '';
             document.removeEventListener('keydown', handleEsc);
         };
-        
+
         modal.querySelector('.close-btn').onclick = closeModal;
-        
+
         // ESC键关闭
         const handleEsc = (e) => {
             if (e.key === 'Escape') {
@@ -429,7 +468,7 @@ class ImageUploader {
             }
         };
         document.addEventListener('keydown', handleEsc);
-        
+
         // 点击模态框外部关闭
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
@@ -457,7 +496,7 @@ class ImageUploader {
             window.open(url, '_blank');
             return;
         }
-        
+
         // 实际文件下载
         const a = document.createElement('a');
         a.href = url;
@@ -472,21 +511,21 @@ class ImageUploader {
         try {
             // 模拟API删除请求
             // await fetch(`/api/files/${fileId}`, { method: 'DELETE' });
-            
+
             // 从本地列表中删除
             this.files = this.files.filter(file => file.id != fileId);
             this.filteredFiles = this.filteredFiles.filter(file => file.id != fileId);
-            
+
             this.totalPages = Math.ceil(this.filteredFiles.length / this.itemsPerPage);
             if (this.currentPage > this.totalPages && this.totalPages > 0) {
                 this.currentPage = this.totalPages;
             }
-            
+
             this.updatePagination();
             this.renderFileList();
             this.previewModal.style.display = 'none';
             document.body.style.overflow = '';
-            
+
             this.showToast('文件已删除', 'success');
         } catch (error) {
             console.error('删除文件失败:', error);
@@ -501,9 +540,9 @@ class ImageUploader {
             <i class="fas ${this.getToastIcon(type)}"></i>
             <span>${message}</span>
         `;
-        
+
         this.toastContainer.appendChild(toast);
-        
+
         // 自动消失
         setTimeout(() => {
             toast.style.animation = 'fadeOut 0.3s ease';

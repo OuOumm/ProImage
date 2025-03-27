@@ -26,9 +26,11 @@
                     <i class="fas fa-cloud-upload-alt upload-icon"></i>
                     <h3>拖放文件到此处或点击上传</h3>
                     <input type="file" id="fileInput" multiple accept="image/*">
-                    <div class="upload-progress" id="uploadProgress">
-                        <div class="progress-bar"></div>
-                        <span class="progress-text">0%</span>
+                    <div class="upload-progress-container">
+                        <div class="upload-progress" id="uploadProgress">
+                            <div class="progress-bar"></div>
+                        </div>
+                        <div class="progress-text" id="progressText">0%</div>
                     </div>
                 </div>
                 <div class="upload-meta">
@@ -44,9 +46,19 @@
                         <i class="fas fa-search"></i>
                         <input type="text" placeholder="搜索图片..." id="searchInput">
                     </div>
-                    <div class="view-controls">
-                        <button class="view-btn active" data-view="grid" title="网格视图"><i class="fas fa-th-large"></i></button>
-                        <button class="view-btn" data-view="list" title="列表视图"><i class="fas fa-list"></i></button>
+                    <div class="toolbar-right">
+                        <select id="itemsPerPage" class="page-size-select">
+                            <option value="5">5项/页</option>
+                            <option value="10">10项/页</option>
+                            <option value="15">15项/页</option>
+                            <option value="20">20项/页</option>
+                            <option value="25">25项/页</option>
+                            <option value="30">30项/页</option>
+                        </select>
+                        <div class="view-controls">
+                            <button class="view-btn active" data-view="grid" title="网格视图"><i class="fas fa-th-large"></i></button>
+                            <button class="view-btn" data-view="list" title="列表视图"><i class="fas fa-list"></i></button>
+                        </div>
                     </div>
                 </div>
                 

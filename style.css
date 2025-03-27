@@ -179,12 +179,19 @@ body {
     margin-right: 0.3rem;
 }
 
+/* 上传进度容器 */
+.upload-progress-container {
+    width: 100%;
+    margin-top: 1.5rem;
+    position: relative;
+}
+
+/* 进度条样式 */
 .upload-progress {
     width: 100%;
     height: 6px;
     background-color: var(--light-gray);
     border-radius: 3px;
-    margin-top: 1.5rem;
     overflow: hidden;
     display: none;
 }
@@ -194,16 +201,18 @@ body {
     width: 0;
     background-color: var(--success-color);
     transition: width 0.3s ease;
-    position: relative;
 }
 
+/* 进度文本样式 */
 .progress-text {
     position: absolute;
-    right: 10px;
+    right: 0;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 0.7rem;
-    color: white;
+    font-size: 0.8rem;
+    color: var(--gray-color);
+    padding-left: 8px;
+    display: none;
 }
 
 /* 文件列表区域 */
@@ -653,4 +662,33 @@ body {
     .view-controls {
         align-self: flex-end;
     }
+}
+
+/* 工具栏右侧布局 */
+.toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* 每页显示数量选择器 */
+.page-size-select {
+    padding: 0.4rem 0.5rem;
+    border: 1px solid var(--light-gray);
+    border-radius: var(--border-radius);
+    background-color: white;
+    color: var(--dark-color);
+    font-size: 0.9rem;
+    outline: none;
+    transition: var(--transition);
+}
+
+.page-size-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
+}
+
+/* 调整视图控制按钮的间距 */
+.view-controls {
+    margin-left: 0.5rem;
 }
