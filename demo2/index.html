@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PICX | 高端免费图床服务</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- 毛玻璃背景层 -->
+    <div class="background-layer"></div>
+
+    <!-- 主容器 -->
+    <div class="container">
+        <!-- 顶部导航 -->
+        <header class="app-header">
+            <div class="logo">
+                <span class="logo-icon">PICX</span>
+                <span class="logo-text">Premium Image Hosting</span>
+            </div>
+            <nav class="nav-links">
+                <a href="#" class="nav-link active">我的图库</a>
+                <a href="#" class="nav-link">上传</a>
+                <a href="#" class="nav-link">API</a>
+                <a href="#" class="nav-link">文档</a>
+            </nav>
+            <div class="user-area">
+                <button class="btn btn-ghost">登录</button>
+                <button class="btn btn-primary">注册</button>
+            </div>
+        </header>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <!-- 上传区域 -->
+            <section class="upload-section">
+                <div class="upload-card glass-card">
+                    <div class="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <h2 class="upload-title">拖放文件到此处上传</h2>
+                    <p class="upload-subtitle">或点击选择文件</p>
+                    <input type="file" id="fileInput" class="file-input" multiple>
+                    <label for="fileInput" class="btn btn-large">选择文件</label>
+                    <div class="upload-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill"></div>
+                        </div>
+                        <div class="progress-text">准备上传...</div>
+                    </div>
+                </div>
+                <div class="upload-features">
+                    <div class="feature-item">
+                        <i class="fas fa-infinity"></i>
+                        <span>永久免费</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-bolt"></i>
+                        <span>全球CDN加速</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-lock"></i>
+                        <span>安全可靠</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 文件列表 -->
+            <section class="file-section">
+                <div class="section-header">
+                    <h3>我的图片</h3>
+                    <div class="controls">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" placeholder="搜索图片...">
+                        </div>
+                        <div class="view-toggle">
+                            <button class="view-btn active" data-view="grid">
+                                <i class="fas fa-th-large"></i>
+                            </button>
+                            <button class="view-btn" data-view="list">
+                                <i class="fas fa-list"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="file-list grid-view">
+                    <!-- 文件项将通过JS动态生成 -->
+                </div>
+
+                <div class="section-footer">
+                    <div class="file-count">共 <span>0</span> 个项目</div>
+                    <div class="pagination">
+                        <button class="page-btn" disabled>
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <span class="page-info">1/1</span>
+                        <button class="page-btn" disabled>
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 图片预览模态框 -->
+    <div class="modal-overlay" id="previewModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>图片预览</h3>
+                <button class="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <img id="modalImage" src="" alt="预览图片">
+            </div>
+            <div class="modal-footer">
+                <div class="url-box">
+                    <input type="text" id="imageUrl" readonly>
+                    <button class="btn btn-copy" id="copyBtn">
+                        <i class="fas fa-copy"></i> 复制链接
+                    </button>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-download">
+                        <i class="fas fa-download"></i> 下载
+                    </button>
+                    <button class="btn btn-delete">
+                        <i class="fas fa-trash"></i> 删除
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

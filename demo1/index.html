@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="h-full bg-gray-50">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>云图床 - 专业图片托管服务</title>
+  <!-- 使用Tailwind CSS 4.0的现代特性 -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,aspect-ratio,line-clamp,container-queries"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              // 使用Tailwind 4.0改进的颜色空间
+              50: 'oklch(97% 0.02 240)',
+              100: 'oklch(93% 0.04 240)',
+              200: 'oklch(86% 0.08 240)',
+              300: 'oklch(78% 0.12 240)',
+              400: 'oklch(70% 0.16 240)',
+              500: 'oklch(62% 0.20 240)',
+              600: 'oklch(54% 0.20 240)',
+              700: 'oklch(46% 0.18 240)',
+              800: 'oklch(38% 0.15 240)',
+              900: 'oklch(30% 0.12 240)',
+            }
+          },
+          spacing: {
+            '128': '32rem',
+            '144': '36rem',
+          },
+        }
+      }
+    }
+  </script>
+</head>
+<body class="h-full">
+  <!-- 主容器 -->
+  <div class="min-h-dvh flex flex-col"> <!-- 使用动态视口单位dvh -->
+    <!-- 导航栏 -->
+    <header class="bg-white shadow-sm">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16 items-center">
+          <div class="flex items-center">
+            <h1 class="text-xl font-bold text-primary-600">云图床</h1>
+            <nav class="hidden md:ml-10 md:flex space-x-8">
+              <a href="#" class="text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 border-primary-500 text-sm font-medium">首页</a>
+              <a href="#" class="text-gray-500 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300 text-sm font-medium">文档</a>
+              <a href="#" class="text-gray-500 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300 text-sm font-medium">定价</a>
+            </nav>
+          </div>
+          <div class="flex items-center">
+            <button type="button" class="bg-primary-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">登录</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- 主要内容区 -->
+    <main class="flex-grow">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <!-- 上传区域 -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+          <div class="text-center">
+            <h2 class="text-2xl font-bold text-gray-900 mb-2">上传图片</h2>
+            <p class="text-gray-500 mb-6">支持拖放或点击上传，最大支持20MB的图片文件</p>
+            
+            <!-- 拖放上传区域 -->
+            <div class="mt-4 border-2 border-dashed border-gray-300 rounded-lg p-12 text-center hover:border-primary-400 transition-colors duration-200" id="dropzone">
+              <div class="flex flex-col items-center justify-center">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                </svg>
+                <div class="mt-4 flex text-sm text-gray-600">
+                  <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-primary-600 hover:text-primary-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary-500">
+                    <span>选择文件</span>
+                    <input id="file-upload" name="file-upload" type="file" class="sr-only" accept="image/*" multiple>
+                  </label>
+                  <p class="pl-1">或拖放到此处</p>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">PNG, JPG, GIF, WEBP 格式，不超过20MB</p>
+              </div>
+            </div>
+            
+            <!-- 上传进度条 -->
+            <div class="mt-6 hidden" id="upload-progress">
+              <div class="flex justify-between text-sm text-gray-600 mb-1">
+                <span>上传中...</span>
+                <span id="progress-percent">0%</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div class="bg-primary-600 h-2.5 rounded-full" id="progress-bar" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 文件列表区域 -->
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+              <h2 class="text-lg font-medium text-gray-900">我的图片</h2>
+              <div class="flex space-x-3">
+                <div class="relative">
+                  <input type="text" placeholder="搜索图片..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500" id="search-input">
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
+                    </svg>
+                  </div>
+                </div>
+                <select class="border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500">
+                  <option>最近上传</option>
+                  <option>名称 (A-Z)</option>
+                  <option>名称 (Z-A)</option>
+                  <option>大小 (小到大)</option>
+                  <option>大小 (大到小)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 图片网格列表 -->
+          <div class="px-6 py-4">
+            <div class="@container"> <!-- 使用Tailwind 4.0的容器查询 -->
+              <div class="grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 @lg:grid-cols-4 gap-4">
+                <!-- 图片卡片示例 -->
+                <div class="group relative bg-gray-100 rounded-lg overflow-hidden aspect-square"> <!-- 使用aspect-ratio插件 -->
+                  <img src="https://picsum.photos/id/12/500/500" alt="示例图片" class="w-full h-full object-cover">
+                  <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                    <div class="flex space-x-2">
+                      <button class="p-2 bg-white rounded-full text-gray-700 hover:bg-gray-100">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                      </button>
+                      <button class="p-2 bg-white rounded-full text-gray-700 hover:bg-gray-100">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                        </svg>
+                      </button>
+                      <button class="p-2 bg-white rounded-full text-gray-700 hover:bg-gray-100">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- 更多图片卡片... -->
+                <div class="group relative bg-gray-100 rounded-lg overflow-hidden aspect-square">
+                  <img src="https://picsum.photos/id/10/300/300" alt="示例图片" class="w-full h-full object-cover">
+                  <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                    <div class="flex space-x-2">
+                      <button class="p-2 bg-white rounded-full text-gray-700 hover:bg-gray-100">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                      </button>
+                      <button class="p-2 bg-white rounded-full text-gray-700 hover:bg-gray-100">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                        </svg>
+                      </button>
+                      <button class="p-2 bg-white rounded-full text-gray-700 hover:bg-gray-100">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 分页控制 -->
+            <div class="flex items-center justify-between mt-6">
+              <div class="text-sm text-gray-500">
+                显示 <span class="font-medium">1</span> 到 <span class="font-medium">10</span> 项，共 <span class="font-medium">124</span> 项
+              </div>
+              <div class="flex space-x-2">
+                <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">上一页</button>
+                <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">下一页</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-white border-t border-gray-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="md:flex md:items-center md:justify-between">
+          <div class="flex justify-center md:order-2 space-x-6">
+            <a href="#" class="text-gray-400 hover:text-gray-500">
+              <span class="sr-only">GitHub</span>
+              <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"></path>
+              </svg>
+            </a>
+          </div>
+          <div class="mt-8 md:mt-0 md:order-1">
+            <p class="text-center text-sm text-gray-500">&copy; 2023 云图床. 保留所有权利.</p>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- 图片预览模态框 -->
+  <div class="fixed inset-0 z-50 hidden" id="image-preview-modal">
+    <div class="absolute inset-0 bg-black bg-opacity-75"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+      <div class="relative w-full max-w-4xl">
+        <button class="absolute -top-10 right-0 text-white hover:text-gray-300 focus:outline-none" id="close-preview">
+          <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+        <img src="" alt="预览图片" class="max-h-[90vh] max-w-full mx-auto" id="preview-image">
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript交互 -->
+  <script>
+    // 拖放上传功能
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('file-upload');
+    const uploadProgress = document.getElementById('upload-progress');
+    const progressBar = document.getElementById('progress-bar');
+    const progressPercent = document.getElementById('progress-percent');
+    
+    // 拖放事件处理
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      dropzone.addEventListener(eventName, preventDefaults, false);
+    });
+    
+    function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropzone.addEventListener(eventName, highlight, false);
+    });
+    
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropzone.addEventListener(eventName, unhighlight, false);
+    });
+    
+    function highlight() {
+      dropzone.classList.add('border-primary-500');
+    }
+    
+    function unhighlight() {
+      dropzone.classList.remove('border-primary-500');
+    }
+    
+    // 处理文件放置
+    dropzone.addEventListener('drop', handleDrop, false);
+    fileInput.addEventListener('change', handleFiles, false);
+    
+    function handleDrop(e) {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      handleFiles({target: {files}});
+    }
+    
+    function handleFiles(e) {
+      const files = e.target.files;
+      if (files.length) {
+        uploadFiles(files);
+      }
+    }
+    
+    // 模拟上传进度
+    function uploadFiles(files) {
+      uploadProgress.classList.remove('hidden');
+      
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += Math.random() * 10;
+        if (progress >= 100) {
+          progress = 100;
+          clearInterval(interval);
+          setTimeout(() => {
+            uploadProgress.classList.add('hidden');
+            progressBar.style.width = '0%';
+            progressPercent.textContent = '0%';
+          }, 1000);
+        }
+        progressBar.style.width = `${progress}%`;
+        progressPercent.textContent = `${Math.round(progress)}%`;
+      }, 200);
+    }
+    
+    // 图片预览功能
+    document.querySelectorAll('[data-preview]').forEach(item => {
+      item.addEventListener('click', function() {
+        const imgSrc = this.querySelector('img').src;
+        document.getElementById('preview-image').src = imgSrc;
+        document.getElementById('image-preview-modal').classList.remove('hidden');
+      });
+    });
+    
+    document.getElementById('close-preview').addEventListener('click', function() {
+      document.getElementById('image-preview-modal').classList.add('hidden');
+    });
+  </script>
+</body>
+</html>
