@@ -23,6 +23,7 @@ class ImageUploader {
         this.filteredFiles = [];
         this.uploadQueue = [];
         this.isUploading = false;
+        this.itemsPerPage = 5; // 每页数量
 
         // 初始化方法
         this.initEventListeners();
@@ -150,7 +151,7 @@ class ImageUploader {
             this.filteredFiles.unshift(uploadedFile);
             
             // 更新分页和渲染
-            this.totalPages = Math.ceil(this.filteredFiles.length / 8);
+            this.totalPages = Math.ceil(this.filteredFiles.length / this.itemsPerPage);
             this.updatePagination();
             this.renderFileList();
             
@@ -252,7 +253,7 @@ class ImageUploader {
             ];
             
             this.filteredFiles = [...this.files];
-            this.totalPages = Math.ceil(this.filteredFiles.length / 5);
+            this.totalPages = Math.ceil(this.filteredFiles.length / this.itemsPerPage);
             this.updatePagination();
             this.renderFileList();
         } catch (error) {
@@ -282,7 +283,7 @@ class ImageUploader {
                 file.uploadedAt.toLowerCase().includes(searchTerm)
             );
         }
-        this.totalPages = Math.ceil(this.filteredFiles.length / 8);
+        this.totalPages = Math.ceil(this.filteredFiles.length / this.itemsPerPage);
         this.currentPage = 1;
         this.updatePagination();
         this.renderFileList();
@@ -298,9 +299,8 @@ class ImageUploader {
         this.fileList.innerHTML = '';
         
         // 分页逻辑
-        const itemsPerPage = 5;
-        const startIndex = (this.currentPage - 1) * itemsPerPage;
-        const endIndex = Math.min(startIndex + itemsPerPage, this.filteredFiles.length);
+        const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+        const endIndex = Math.min(startIndex + this.itemsPerPage, this.filteredFiles.length);
         const filesToShow = this.filteredFiles.slice(startIndex, endIndex);
         
         if (filesToShow.length === 0) {
@@ -477,7 +477,7 @@ class ImageUploader {
             this.files = this.files.filter(file => file.id != fileId);
             this.filteredFiles = this.filteredFiles.filter(file => file.id != fileId);
             
-            this.totalPages = Math.ceil(this.filteredFiles.length / 8);
+            this.totalPages = Math.ceil(this.filteredFiles.length / this.itemsPerPage);
             if (this.currentPage > this.totalPages && this.totalPages > 0) {
                 this.currentPage = this.totalPages;
             }
