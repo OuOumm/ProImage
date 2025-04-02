@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>极速图床 - 专业的图片托管服务</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css">
+    <!-- 引入样式文件 -->
+    <link rel="stylesheet" href="style.css"></link>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">极速图床</div>
+            <div class="user-actions">
+                <button class="btn btn-primary">登录</button>
+                <button class="btn btn-primary">注册</button>
+            </div>
+        </header>
+
+        <section class="upload-section">
+            <h2>上传图片</h2>
+            <div class="upload-area" id="uploadArea">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <h3>拖放文件到此处或点击选择文件</h3>
+                <p>支持 JPG, PNG, GIF, WebP 等格式，单文件最大 20MB</p>
+            </div>
+            <input type="file" id="fileInput" multiple style="display: none;">
+
+            <div class="upload-progress" id="uploadProgress">
+                <div class="progress-bar">
+                    <div class="progress" id="progressBar"></div>
+                </div>
+                <div id="progressText">准备上传...</div>
+            </div>
+        </section>
+
+        <section class="file-list-section">
+            <div class="file-list-header">
+                <h2>我的图片</h2>
+                <div class="view-options">
+                    <input type="text" class="search-box" placeholder="搜索图片...">
+                    <button class="view-btn active"><i class="fas fa-th-large"></i></button>
+                    <button class="view-btn"><i class="fas fa-list"></i></button>
+                </div>
+            </div>
+
+            <div class="file-grid" id="fileGrid">
+                <!-- 文件卡片将通过JavaScript动态生成 -->
+            </div>
+        </section>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
