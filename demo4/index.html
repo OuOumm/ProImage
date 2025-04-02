@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>iGallery | Apple风格专业图床</title>
+  <meta name="description" content="具有Apple设计美学的现代化图床应用">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- 自定义Apple风格 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- 引入库 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.3/dragula.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/libavif-js@0.9.0/dist/libavif.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dexie/3.2.4/dexie.min.js"></script>
+  
+  <style>
+    :root {
+      --system-blue: #0A84FF;
+      --system-gray: #8E8E93;
+      --system-background: #FFFFFF;
+      --system-grouped-background: #F2F2F7;
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --system-blue: #5E9EFF;
+        --system-gray: #8E8E93;
+        --system-background: #000000;
+        --system-grouped-background: #1C1C1E;
+      }
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--system-grouped-background);
+      color: #1C1C1E;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    .glass-morphism {
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+    
+    .dark .glass-morphism {
+      background: rgba(30, 30, 32, 0.5);
+    }
+    
+    .press-effect:active {
+      transform: scale(0.96);
+      opacity: 0.8;
+    }
+    
+    .card-hover:hover {
+      transform: scale(1.02);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .progress-ring__circle {
+      transition: stroke-dashoffset 0.35s;
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+    }
+  </style>
+</head>
+<body class="h-full flex flex-col">
+  <!-- 导航栏 -->
+  <header class="bg-white/80 dark:bg-black/80 backdrop-blur-md z-50">
+    <nav class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-1">
+        <i class="fas fa-camera text-blue-500 text-xl"></i>
+        <span class="font-semibold text-lg">iGallery</span>
+      </div>
+      <div class="flex items-center space-x-4">
+        <button id="themeToggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+          <i class="fas fa-moon dark:hidden"></i>
+          <i class="fas fa-sun hidden dark:block"></i>
+        </button>
+        <button class="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors press-effect">
+          上传
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- 主内容区 -->
+  <main class="flex-1 max-w-6xl mx-auto px-4 py-8 w-full">
+    <!-- 上传面板 -->
+    <section id="uploadSection" class="glass-morphism rounded-2xl p-8 mb-8 transition-all duration-300">
+      <div id="dropZone" class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-12 text-center cursor-pointer transition-all duration-300 hover:border-blue-500">
+        <div class="max-w-md mx-auto">
+          <i class="fas fa-cloud-upload-alt text-4xl text-blue-500 mb-4"></i>
+          <h2 class="text-xl font-semibold mb-2">拖放图片到此处</h2>
+          <p class="text-gray-500 dark:text-gray-400 mb-4">支持 JPEG, PNG, GIF, WEBP 格式</p>
+          <button id="fileSelectBtn" class="px-6 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors press-effect">
+            选择文件
+          </button>
+          <input type="file" id="fileInput" class="hidden" accept="image/*" multiple>
+          <p class="text-sm text-gray-400 mt-4">或直接粘贴截图 (Ctrl+V)</p>
+        </div>
+      </div>
+      
+      <!-- 上传队列 -->
+      <div id="uploadQueue" class="mt-6 space-y-3 hidden">
+        <h3 class="font-medium text-gray-700 dark:text-gray-300">上传队列</h3>
+        <div id="queueItems" class="space-y-2"></div>
+      </div>
+    </section>
+
+    <!-- 图片库 -->
+    <section id="gallerySection">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-semibold">你的图片</h2>
+        <div class="relative">
+          <input type="text" id="searchInput" placeholder="搜索图片..." class="pl-10 pr-4 py-2 rounded-full bg-white/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+        </div>
+      </div>
+      
+      <div id="galleryGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <!-- 图片卡片将通过JavaScript动态生成 -->
+      </div>
+    </section>
+  </main>
+
+  <!-- 通知系统 -->
+  <div id="notificationContainer" class="fixed bottom-4 right-4 space-y-2 z-50"></div>
+
+  <script src="script.js" type="module"></script>
+</body>
+</html>
